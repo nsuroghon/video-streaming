@@ -1,23 +1,27 @@
-# Use an official Node runtime as a parent image
-FROM node:18
+FROM node:18 AS builder
 
-# Set the working directory in the container to /app
 WORKDIR /app
 
-# Install ffmpeg in the container
-RUN apt-get update && apt-get install -y ffmpeg
-
-# Copy package.json and package-lock.json into the working directory
 COPY package*.json ./
 
-# Install any needed packages specified in package.json
 RUN npm install
 
-# Copy app source inside the docker image
 COPY . .
 
-# Make port 3000 available outside this container
+RUN npm run build
+
+FROM node:18
+
+RUN apt-get update && apt-get install -y ffmpeg
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
 
-# Define the command to run your app using CMD (only one CMD allowed)
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "serve" ]
