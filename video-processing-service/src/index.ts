@@ -1,5 +1,4 @@
 import express from 'express';
-import ffmpeg from 'fluent-ffmpeg';
 
 import { 
   uploadProcessedVideo,
@@ -10,12 +9,15 @@ import {
   setupDirectories
 } from './storage';
 
+// Create the local directories for videos
 setupDirectories();
 
 const app = express();
 app.use(express.json());
 
-app.post('/process-video', async (req,res) => {
+// Process a video file from Cloud Storage into 360p
+app.post('/process-video', async (req, res) => {
+
   // Get the bucket and filename from the Cloud Pub/Sub message
   let data;
   try {
@@ -55,9 +57,9 @@ app.post('/process-video', async (req,res) => {
   ]);
 
   return res.status(200).send('Processing finished successfully');
-})
+});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
